@@ -8,6 +8,7 @@
 //*** INCLUDE HEADERS ***
 
 //#include "Hogehoge.hpp"
+#include "command/WigglerCommand.hpp"
 
 //***********************
 
@@ -40,6 +41,7 @@ namespace {
 		//CommandPair("コマンド名", [クリエイター関数のポインタ]),
 		return std::vector<CommandPair> {
 			//CommandPair("Hogehoge", ccr::Hogehoge::creator),
+			CommandPair("wlibWiggler", wlib::WigglerCommand::creator)
 		};
 	}
 
@@ -159,7 +161,7 @@ MStatus wlib::initializePlugin(MObject _obj) {
 #ifdef _DEBUG
 		//デバッグ時のみ標準出力をエラー出力へ切り替え
 		std::cout.rdbuf(std::cerr.rdbuf());
-		std::cout << "CarMotionAnimator is debug mode." << std::endl;
+		std::cout << "wlibWiggler is debug mode." << std::endl;
 #endif
 	}
 	else {

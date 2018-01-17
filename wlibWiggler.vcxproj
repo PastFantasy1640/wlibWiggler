@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{082b662e-256f-4956-9c2d-bb5579a5d779}</ProjectGuid>
     <RootNamespace>wlibWiggler</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -98,7 +98,7 @@
       <AdditionalOptions>/export:initializePlugin /export:uninitializePlugin %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y $(TargetPath) "$(MAYA2015_PATH)\plug-ins\custom" </Command>
+      <Command>copy /Y $(TargetPath) "$(MAYA2015_WLIB_PLUGIN_PATH)" </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -134,7 +134,7 @@
       <AdditionalOptions>/export:initializePlugin /export:uninitializePlugin %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y $(TargetPath) "$(MAYA2015_PATH)\plug-ins\custom" </Command>
+      <Command>copy /Y $(TargetPath) "$(MAYA2015_WLIB_PLUGIN_PATH)" </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

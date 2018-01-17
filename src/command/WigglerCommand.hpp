@@ -13,6 +13,7 @@
 #include <maya/MArgList.h>
 #include <maya/MString.h>
 #include <maya/MStringArray.h>
+#include <vector>
 
 namespace wlib {
 
@@ -52,14 +53,24 @@ namespace wlib {
 
 	private:
 
+		struct AttributePair {
+			const MString fullpath_;
+			const MString object_;
+			const MString attribute_;
+			AttributePair(const MString & fullpath, const MString & object, const MString & attribute);
+			static AttributePair create(const MString & fullpath);
+			bool isExist(void) const;
+		};
+
 		int seed_;
 		int period_;
 		double strength_;
 		int start_;
 		int end_;
-		int smoothing_;
-		MStringArray attribute_;
-
+		MString smoothing_;
+		
+		std::vector<AttributePair> attributes_;
+		
 
 	};
 
