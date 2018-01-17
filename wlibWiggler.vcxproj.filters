@@ -18,18 +18,30 @@
     <Filter Include="script">
       <UniqueIdentifier>{1fcbed5d-d0a6-4b28-bd67-931f80fbf299}</UniqueIdentifier>
     </Filter>
+    <Filter Include="exception">
+      <UniqueIdentifier>{9813558f-427b-4e42-a141-184c79bddbf3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\wlibWiggler.hpp">
       <Filter>main</Filter>
     </ClInclude>
-    <ClInclude Include="src\WigglerCommand.hpp">
+    <ClInclude Include="src\command\WigglerCommand.hpp">
       <Filter>command</Filter>
+    </ClInclude>
+    <ClInclude Include="src\exception\MStatusException.hpp">
+      <Filter>exception</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\wlibWiggler.cpp">
       <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="src\exception\MStatusException.cpp">
+      <Filter>exception</Filter>
+    </ClCompile>
+    <ClCompile Include="src\command\WigglerCommand.cpp">
+      <Filter>command</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -55,7 +55,6 @@ namespace wlib {
 		int seed_;
 		int period_;
 		double strength_;
-		double offset_;
 		int start_;
 		int end_;
 		int smoothing_;

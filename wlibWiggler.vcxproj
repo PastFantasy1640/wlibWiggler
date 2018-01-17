@@ -138,10 +138,13 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\WigglerCommand.hpp" />
+    <ClInclude Include="src\command\WigglerCommand.hpp" />
+    <ClInclude Include="src\exception\MStatusException.hpp" />
     <ClInclude Include="src\wlibWiggler.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\command\WigglerCommand.cpp" />
+    <ClCompile Include="src\exception\MStatusException.cpp" />
     <ClCompile Include="src\wlibWiggler.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
