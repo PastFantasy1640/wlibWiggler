@@ -45,7 +45,9 @@ namespace wlib {
 		~WigglerCommand();
 
 		virtual MStatus doIt(const MArgList& args) override;
-		virtual MStatus redoIt() override;
+		virtual MStatus redoIt(void) override;
+		virtual MStatus undoIt(void) override;
+		virtual bool isUndoable(void) const override;
 
 		static void* creator();
 
@@ -70,6 +72,9 @@ namespace wlib {
 		MString smoothing_;
 		
 		std::vector<AttributePair> attributes_;
+
+		typedef std::pair<int, double> Key;
+		std::vector<Key> keys_;
 		
 
 	};

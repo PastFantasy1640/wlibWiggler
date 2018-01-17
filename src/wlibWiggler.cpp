@@ -4,6 +4,7 @@
 #include <string>
 #include <maya/MStringArray.h>
 #include <maya/MGlobal.h>
+#include "exception/MStatusException.hpp"
 
 //*** INCLUDE HEADERS ***
 
@@ -58,80 +59,52 @@ namespace {
 	/** [hidden]addCommands
 	* コマンドを追加する。コマンドの一覧はgetCommands関数内に記述する
 	* @param plugin プラグインインスタンス
-	* @returns 追加に関する結果ステータス
+	* @throws MStatusException コマンドが登録できない時
 	*/
-	MStatus addCommands(MFnPlugin & plugin) {
+	void addCommands(MFnPlugin & plugin) {
 		std::vector<CommandPair> cmd_pairs = getCommands();
-		MStatus stat;
 		for (auto p = cmd_pairs.begin(); p != cmd_pairs.end(); ++p) {
-			stat = plugin.registerCommand(p->command, p->creator);
-			if (!stat) {
-				//コマンド登録時にエラーが発生
-				stat.perror(std::string("An error occured during registering command : " + std::string(p->command.asChar())).c_str());
-				break;
-			}
+			wlib::MStatusException::throwIf(plugin.registerCommand(p->command, p->creator), "コマンドの登録中にエラーが発生しました : コマンド名" + p->command, "addCommands");
 		}
-		return stat;
 	}
 
 
 	/** [hidden]addNodes
 	* ノードを追加する。ノードの一覧はgetNodes関数内に記述する
 	* @param plugin プラグインインスタンス
-	* @returns 追加に関する結果ステータス
+	* @throws MStatusException ノードが登録できない時
 	*/
-	MStatus addNodes(MFnPlugin & plugin) {
+	void addNodes(MFnPlugin & plugin) {
 		std::vector<NodePair> node_pairs = getNodes();
-		MStatus stat;
 		for (auto p = node_pairs.begin(); p != node_pairs.end(); ++p) {
-			stat = plugin.registerNode(p->node, p->id, p->creator, p->initialize);
-			if (!stat) {
-				//コマンド登録時にエラーが発生
-				stat.perror(std::string("An error occured during registering dipendency node : " + std::string(p->node.asChar())).c_str());
-				break;
-			}
+			wlib::MStatusException::throwIf(plugin.registerNode(p->node, p->id, p->creator, p->initialize), "ノードの登録中にエラーが発生しました : ノード名" + p->node, "addNode");
 		}
-		return stat;
 	}
 
 
 	/** [hidden]removeCommands
 	* コマンドを登録解除する。コマンドの一覧はgetCommands関数内に記述する
 	* @param plugin プラグインインスタンス
-	* @returns 追加に関する結果ステータス
+	* @throws MStatusException コマンドが登録解除できない時
 	*/
-	MStatus removeCommands(MFnPlugin & plugin) {
+	void removeCommands(MFnPlugin & plugin) {
 		std::vector<CommandPair> cmd_pairs = getCommands();
-		MStatus stat;
 		for (auto p = cmd_pairs.begin(); p != cmd_pairs.end(); ++p) {
-			stat = plugin.deregisterCommand(p->command);
-			if (!stat) {
-				//コマンド登録解除時にエラーが発生
-				stat.perror(std::string("An error occured during deregistering command : " + std::string(p->command.asChar())).c_str());
-				break;
-			}
+			wlib::MStatusException::throwIf(plugin.deregisterCommand(p->command), "コマンドの登録解除中にエラーが発生しました : コマンド名" + p->command, "addCommands");
 		}
-		return stat;
 	}
 
 
 	/** [hidden]addNodes
 	* ノードを登録解除する。ノードの一覧はgetNodes関数内に記述する
 	* @param plugin プラグインインスタンス
-	* @returns 追加に関する結果ステータス
+	* @throws MStatusException ノードが登録解除できない時
 	*/
-	MStatus removeNodes(MFnPlugin & plugin) {
+	void removeNodes(MFnPlugin & plugin) {
 		std::vector<NodePair> node_pairs = getNodes();
-		MStatus stat;
 		for (auto p = node_pairs.begin(); p != node_pairs.end(); ++p) {
-			stat = plugin.deregisterNode(p->id);
-			if (!stat) {
-				//コマンド登録解除時にエラーが発生
-				stat.perror(std::string("An error occured during deregistering dipendency node : " + std::string(p->node.asChar())).c_str());
-				break;
-			}
+			wlib::MStatusException::throwIf(plugin.deregisterNode(p->id) ,"ノードの登録中にエラーが発生しました : ノード名" + p->node, "addNode");
 		}
-		return stat;
 	}
 
 };
@@ -145,11 +118,14 @@ MStatus wlib::initializePlugin(MObject _obj) {
 	std::cerr << "White Library - wlibWiggler" << std::endl;
 	std::cerr << "version 0.1" << std::endl;
 	MStatus stat = MStatus::kSuccess;
-	do {
-		if ((stat = addCommands(plugin)) != MStatus::kSuccess) break;
-		if ((stat = addNodes(plugin)) != MStatus::kSuccess) break;
-
-	} while (false);
+	try{
+		addCommands(plugin);
+		addNodes(plugin); 
+	}
+	catch (MStatusException e) {
+		std::cerr << e.toString() << std::endl;
+		stat = e.stat;
+	}
 
 	//読み込み時に他に何かするならここに追加
 
@@ -179,10 +155,14 @@ MStatus wlib::initializePlugin(MObject _obj) {
 MStatus wlib::uninitializePlugin(MObject _obj) {
 	MFnPlugin plugin(_obj);
 	MStatus stat = MStatus::kSuccess;
-	do {
-		if ((stat = removeCommands(plugin)) != MStatus::kSuccess) break;
-		if ((stat = removeNodes(plugin)) != MStatus::kSuccess) break;
-	} while (false);
+	try {
+		removeCommands(plugin);
+		removeNodes(plugin);
+	}
+	catch (MStatusException e) {
+		std::cerr << e.toString() << std::endl;
+		stat = e.stat;
+	}
 
 	//メニューの解除
 	//MGlobal::executeCommand("ccr_DeleteUI");

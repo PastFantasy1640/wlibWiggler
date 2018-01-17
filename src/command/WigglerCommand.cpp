@@ -123,14 +123,43 @@ MStatus wlib::WigglerCommand::doIt(const MArgList & args)
 
 		//変数にセットできた
 		//計算
+
+		for (auto attr = this->attributes_.begin(); attr != this->attributes_.end(); ++attr) {
+
+			std::cout << "[setKeyframe]オブジェクト:" << attr->object_ << " アトリビュート:" << attr->attribute_ << std::endl;
+
+			std::mt19937 mt(this->seed_);
+			std::uniform_real_distribution<> rand_range(0.0, this->strength_);
+			//オフセットの設定
+			//ウィグラー開始フレーム時点の値
+			double offset = 0.0;
+			MStatusException::throwIf(MGlobal::executeCommand("getAttr " + attr->fullpath_, offset), "アトリビュート:" + attr->fullpath_ + "の取得に失敗", place);
+
+			//開始点に打つ
+			//setKeyframe(attr, this->start_, offset);
+			//setKeyframe(attr, this->end_, offset);
+			this->keys_.push_back(Key(this->start_, offset));
+			this->keys_.push_back(Key(this->end_, offset));
+
+			for (int frame = this->start_ + this->period_; frame < this->end_; frame += this->period_) {
+				//乱数を発生させる
+				this->keys_.push_back(Key(frame, offset + rand_range(mt)));
+				//setKeyframe(attr, frame, offset + rand_range(mt));
+			}
+		}
+
+		//実際にキーを打つ
 		ret_stat = this->redoIt();
 
 	}
 	catch (MStatusException e) {
-		MGlobal::displayError(e.toString());
+		displayError(e.toString());
 		std::cout << e.toString() << std::endl;
 		ret_stat = e.stat;
 	}
+
+	setResult(static_cast<unsigned int>(this->keys_.size()));
+
 	return ret_stat;
 }
 
@@ -152,30 +181,54 @@ MStatus wlib::WigglerCommand::redoIt()
 
 			std::cout << "[setKeyframe]オブジェクト:" << attr->object_ << " アトリビュート:" << attr->attribute_ << std::endl;
 
-			std::mt19937 mt(this->seed_);
-			std::uniform_real_distribution<> rand_range(0.0, this->strength_);
-			//オフセットの設定
-			//ウィグラー開始フレーム時点の値
-			double offset = 0.0;
-			MStatusException::throwIf(MGlobal::executeCommand("getAttr " + attr->fullpath_, offset), "アトリビュート:" + attr->fullpath_ + "の取得に失敗", place);
-			
-			//開始点に打つ
-			setKeyframe(attr, this->start_, offset);
-			setKeyframe(attr, this->end_, offset);
-			
-			for (int frame = this->start_ + this->period_; frame < this->end_; frame += this->period_) {
-				//乱数を発生させる
-				setKeyframe(attr, frame, offset + rand_range(mt));
+			for (auto p = this->keys_.begin(); p != this->keys_.end(); ++p) {
+				setKeyframe(attr, p->first, p->second);
 			}
 		}
 	}
 	catch (MStatusException e) {
-		MGlobal::displayError(e.toString());
+		displayError(e.toString());
 		std::cout << e.toString() << std::endl;
 		ret_stat = e.stat;
 	}
 
 	return ret_stat;
+}
+
+MStatus wlib::WigglerCommand::undoIt()
+{
+	MStatus ret_stat, stat;
+	MString place("wlib::WigglerCommand::redoIt");
+
+	auto cutKeyframe = [this, place](const std::vector<AttributePair>::const_iterator & attr, const int frame) {
+		int ret_keys = 0;
+		std::cout << ("cutKey -attribute " + attr->attribute_ + " -time " + frame + " -option keys -clear " + attr->object_) << std::endl;
+		MStatusException::throwIf(MGlobal::executeCommand("cutKey -attribute " + attr->attribute_ + " -time " + frame + " -option keys " + attr->object_, ret_keys), "キーフレームの削除に失敗", place);
+		return ret_keys;
+	};
+
+
+	try {
+		for (auto attr = this->attributes_.begin(); attr != this->attributes_.end(); ++attr) {
+
+			std::cout << "[cutKeyframe]オブジェクト:" << attr->object_ << " アトリビュート:" << attr->attribute_ << std::endl;
+
+			for (auto p = this->keys_.begin(); p != this->keys_.end(); ++p) {
+				cutKeyframe(attr, p->first);
+			}
+		}
+	}
+	catch (MStatusException e) {
+		displayError(e.toString());
+		std::cout << e.toString() << std::endl;
+		ret_stat = e.stat;
+	}
+	return ret_stat;
+}
+
+bool wlib::WigglerCommand::isUndoable(void) const
+{
+	return true;
 }
 
 
